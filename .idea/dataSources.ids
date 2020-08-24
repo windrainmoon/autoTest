@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component name="dataSourceStorage">
+  <data-source name="SQLite - AutoTest" uuid="08d2a546-28eb-4b30-80d3-b7d6ca18264c">
+    <database-info product="SQLite" version="3.31.1" jdbc-version="2.1" driver-name="SQLite JDBC" driver-version="3.31.1">
+      <identifier-quote-string>&quot;</identifier-quote-string>
+    </database-info>
+    <case-sensitivity plain-identifiers="mixed" quoted-identifiers="mixed"/>
+    <schema name="" catalog=""/>
+    <table name="runTestCaseLog" schema="" catalog="" type="TABLE">
+      <column name="csrf_token" sqlType="TEXT" precision="2000000000" scale="10" nullable="false" jdbcType="12"/>
+      <column name="testSuiteId" sqlType="TEXT" precision="2000000000" scale="10" nullable="false" jdbcType="12"/>
+      <column name="startTime" sqlType="TEXT" precision="2000000000" scale="10" nullable="false" jdbcType="12"/>
+      <column name="endTime" sqlType="TEXT" precision="2000000000" scale="10" nullable="false" jdbcType="12"/>
+      <column name="user_id" sqlType="TEXT" precision="2000000000" scale="10" nullable="false" jdbcType="12"/>
+      <column name="allItemCount" sqlType="INTEGER" precision="2000000000" scale="10" nullable="false" jdbcType="4" def="MA=="/>
+      <column name="nowItemCount" sqlType="INTEGER" precision="2000000000" scale="10" nullable="false" jdbcType="4" def="MA=="/>
+      <column name="runCaseId" sqlType="TEXT" precision="2000000000" scale="10" nullable="true" jdbcType="12"/>
+      <column name="runResult" sqlType="TEXT" precision="2000000000" scale="10" nullable="true" jdbcType="12"/>
+      <primary-key columns="runCaseId"/>
+    </table>
+    <table name="sqlite_autoindex_runTestCaseLog_1" schema="" catalog="" type="SYSTEM TABLE"/>
+    <table name="sqlite_autoindex_testCases_1" schema="" catalog="" type="SYSTEM TABLE"/>
+    <table name="sqlite_autoindex_testSuites_1" schema="" catalog="" type="SYSTEM TABLE"/>
+    <table name="sqlite_autoindex_user_1" schema="" catalog="" type="SYSTEM TABLE"/>
+    <table name="sqlite_sequence" schema="" catalog="" type="SYSTEM TABLE"/>
+    <table name="testCases" schema="" catalog="" type="TABLE">
+      <column name="case_id" sqlType="TEXT" precision="2000000000" scale="10" nullable="true" jdbcType="12"/>
+      <column name="suite_id" sqlType="TEXT" precision="2000000000" scale="10" nullable="false" jdbcType="12"/>
+      <column name="case_description" sqlType="TEXT" precision="2000000000" scale="10" nullable="true" jdbcType="12"/>
+      <column name="position" sqlType="INT" precision="2000000000" scale="10" nullable="false" jdbcType="4" def="LTE="/>
+      <primary-key columns="case_id"/>
+    </table>
+    <table name="testSteps" schema="" catalog="" type="TABLE">
+      <column name="step_id" sqlType="TEXT" precision="2000000000" scale="10" nullable="false" jdbcType="12"/>
+      <column name="step_type" sqlType="TEXT" precision="2000000000" scale="10" nullable="false" jdbcType="12"/>
+      <column name="step_param1" sqlType="TEXT" precision="2000000000" scale="10" nullable="true" jdbcType="12"/>
+      <column name="step_param2" sqlType="TEXT" precision="2000000000" scale="10" nullable="true" jdbcType="12"/>
+      <column name="step_param3" sqlType="TEXT" precision="2000000000" scale="10" nullable="true" jdbcType="12"/>
+      <column name="step_param4" sqlType="TEXT" precision="2000000000" scale="10" nullable="true" jdbcType="12"/>
+      <column name="step_param5" sqlType="TEXT" precision="2000000000" scale="10" nullable="true" jdbcType="12"/>
+      <column name="case_id" sqlType="TEXT" precision="2000000000" scale="10" nullable="false" jdbcType="12"/>
+      <column name="step_name" sqlType="TEXT" precision="2000000000" scale="10" nullable="false" jdbcType="12" def="J3N0ZXAn"/>
+      <column name="position" sqlType="INT" precision="2000000000" scale="10" nullable="false" jdbcType="4" def="LTE="/>
+    </table>
+    <table name="testSuites" schema="" catalog="" type="TABLE">
+      <column name="suite_id" sqlType="TEXT" precision="2000000000" scale="10" nullable="true" jdbcType="12"/>
+      <column name="suite_description" sqlType="TEXT" precision="2000000000" scale="10" nullable="true" jdbcType="12"/>
+      <column name="user_id" sqlType="TEXT" precision="2000000000" scale="10" nullable="true" jdbcType="12"/>
+      <column name="position" sqlType="INT" precision="2000000000" scale="10" nullable="false" jdbcType="4" def="LTE="/>
+      <primary-key columns="suite_id"/>
+    </table>
+    <table name="user" schema="" catalog="" type="TABLE">
+      <column name="user_id" sqlType="TEXT" precision="2000000000" scale="10" nullable="true" jdbcType="12"/>
+      <column name="user_name" sqlType="TEXT" precision="2000000000" scale="10" nullable="true" jdbcType="12"/>
+      <column name="user_password" sqlType="TEXT" precision="2000000000" scale="10" nullable="true" jdbcType="12"/>
+      <column name="user_head" sqlType="TEXT" precision="2000000000" scale="10" nullable="true" jdbcType="12"/>
+      <column name="others" sqlType="TEXT" precision="2000000000" scale="10" nullable="true" jdbcType="12"/>
+      <primary-key columns="user_id"/>
+    </table>
+    <table name="user_params" schema="" catalog="" type="TABLE">
+      <column name="user_id" sqlType="TEXT" precision="2000000000" scale="10" nullable="false" jdbcType="12"/>
+      <column name="param_name" sqlType="TEXT" precision="2000000000" scale="10" nullable="false" jdbcType="12"/>
+      <column name="param_type" sqlType="TEXT" precision="2000000000" scale="10" nullable="false" jdbcType="12"/>
+      <column name="param_value" sqlType="TEXT" precision="2000000000" scale="10" nullable="false" jdbcType="12"/>
+    </table>
+  </data-source>
+</component>

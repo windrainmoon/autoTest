@@ -1,0 +1,336 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>testCase</title>
+    <!-- jstree css样式 -->
+    <style type="text/css">
+
+        table
+        {
+            border: black solid 1px;
+            border-collapse: collapse;
+        }
+        td
+        {
+            border: black solid 1px;
+            padding: 3px;
+        }
+        .td_Num
+        {
+            width: 10%;
+            text-align: center;
+        }
+        .td_Item
+        {
+            width: 20%;
+            text-align: center;
+        }
+        .td_Oper
+        {
+            width: 30%;
+            text-align: center;
+        }
+        .td_Oper span
+        {
+            cursor: pointer;
+        }
+
+    </style>
+
+    <!-- jquery.js -->
+{#    <script src="{{ url_for('static', filename='js/ckeditor.js') }}"></script>#}
+<script language="javascript" src="{{ url_for('static', filename='js/jquery.table.tr.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/jquery.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/main/func_common.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/main/func_param.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/main/func_tree.js') }}"></script>
+    <script src="{{ url_for('static', filename='packages/jstree/jstree.min.js') }}"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='packages/jstree/themes/default/style.min.css') }}"/>
+{#    <link rel="stylesheet" href="{{ url_for('static', filename='css/docs.css') }}"/>#}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/tableStyle.css') }}"/>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/selectStyle.css') }}"/>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/labelStyle.css') }}"/>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.css') }}"/>
+</head>
+<body>
+<!-- 设置容器元素 -->
+<div id="box" style="float: left;width:98%;height: 98%;position:relative; margin: 5px">
+    <div style="float: left;width: 30%">
+    <p style="width: 50%;float: left">以下为测试流程配置</p>
+        <button id="full-screen-btn" onclick="return changeScreen()" style="width: 100px">全屏显示</button>
+    <input class="search_input" type="text" id="search_input"  placeholder="请输入信息搜索" />
+    <div id="jstree" style="float: left; width: 100%"></div>
+        </div>
+    <div id="line"
+         style="position:absolute;top:0;left:30%;height:100%;width:4px;overflow:hidden;background:#fcf6ff;cursor:w-resize;"></div>
+    <div id="testCaseDetail" style="float: right;width: 65%;height: 100%;overflow: auto" class="table-wrapper">
+        <form id="testDetail">
+
+        </form>
+    </div>
+</div>
+
+
+<script type="text/javascript">
+    function GetTreeData(tree_item_id, tree_item_type) {
+        var arrs = [];
+        $.ajax({
+            type: "GET",
+            url: "/main/root.json?id=" + tree_item_id + "&type=" + tree_item_type,
+            dataType: "json",
+            async: false,
+            success: function (result) {
+                if (result.resultCode == '302') {
+                    top.location.href = result.result;
+                } else {
+                    var arrays = result.result;
+                    for (var i = 0; i < arrays.length; i++) {
+                        var arr = {
+                            "id": arrays[i].id,
+                            "parent": arrays[i].parent,
+                            "text": arrays[i].text,
+                            "type": arrays[i].type,
+                            "children": arrays[i].children,
+                            "a_attr": {
+                                "step_param1": arrays[i].step_param1,
+                                "step_param2": arrays[i].step_param2,
+                                "step_param3": arrays[i].step_param3,
+                                "step_param4": arrays[i].step_param4,
+                                "step_param5": arrays[i].step_param5
+                            }
+                        };
+                        arrs.push(arr);
+                    }
+                }
+            },
+            error: function (xhr, state, errorThrown) {
+                console.log(xhr, state, errorThrown)
+            }
+        });
+        return arrs
+    }
+
+
+    $(function () {
+        //当DOM准备好时创建一个jstree实例
+        $('#jstree').jstree({
+            core: {
+                "check_callback": true,
+                data: function (node, render) {
+                    if (node.id == "#") {
+                        render(GetTreeData("", ""))
+                    }
+                    else {
+                        render(GetTreeData(node.id, node.original.type));
+                    }
+                }
+            },
+            // plugins  存储所有已加载的jstree插件
+            'plugins': [
+                'contextmenu', 'types', 'dnd', 'search'
+            ],
+            "types": {
+                "root": {"valid_children": ["testSuite"]},
+                "testCase": {
+                    "valid_children": ["testStepOracleExecute", "testStepFile", "testStepOracleCheck", "testStepWebInterface"],
+                    "icon": "{{ url_for('static', filename='icons/testCase.png')}}"
+                },
+                "testSuite": {
+                    "valid_children": ["testCase"],
+                    "icon": "{{ url_for('static', filename='icons/testSuite.png')}}"
+                },
+                "testStepOracleExecute": {
+                    "valid_children": [],
+                    "icon": "{{ url_for('static', filename='icons/testStep_database.png')}}"
+                },
+                "testStepOracleCheck": {
+                    "valid_children": [],
+                    "icon": "{{ url_for('static', filename='icons/testStep_dataAssert.png')}}"
+                },
+                "testStepFile": {
+                    "valid_children": [],
+                    "icon": "{{ url_for('static', filename='icons/testStep_file.png')}}"
+                },
+                "testStepWebInterface":{
+                    "valid_children": [],
+                    "icon": "{{ url_for('static', filename='icons/testStep_interface.png')}}"
+                },
+                '#': {"valid_children": []}
+            },
+            //contextmenu 存储contextmenu插件的所有默认值
+            'contextmenu': {
+                'items': customMenu
+            }
+        });
+
+        {#         $('#jstree').on('move_node.jstree', function(e,data){#}
+        {#                             console.log(data);#}
+        {#                                     });#}
+
+        //loaded.jstree: triggered after the root node is loaded for the first time
+        //ready.jstree : triggered after all nodes are finished loading
+
+        $("#jstree").on("ready.jstree", function (e, data) {
+                    $('#jstree').jstree('close_all');
+                    });
+
+        $("#jstree").on("loaded.jstree", function (e, data) {
+                    $('#jstree').jstree('open_all');
+                    });
+
+        $('#jstree').on('move_node.jstree', function (e, data) {
+{#            console.info(data);#}
+            moveNode(data);
+        });
+        $('#jstree').on('copy_node.jstree', function (e, data) {
+{#            console.info('copy !', data);#}
+            copyNode(data);
+        });
+        $('#jstree').on('hover_node.jstree', function (e, data) { //鼠标移上事件
+            var id = data.node.a_attr.id;
+            var item = document.getElementById(id);
+            item.style.display='inline';
+            });
+        $('#jstree').on('dehover_node.jstree', function (e, data) {
+                //监听鼠标移出事件
+                var id = data.node.a_attr.id;
+            var item = document.getElementById(id);
+            item.style.display='inline-block';
+
+            });
+
+        $('#jstree').on('changed.jstree', function (e, data) {
+//当前选中节点的id
+            if (data.action == "delete_node") {
+                return;
+            }
+            var dom = data.instance.get_node(data.selected[0]);
+            var domType = dom.type;
+
+            if (domType == "root") {
+                setParamTable();
+            }
+            else if (domType == "testStepOracleExecute") {
+                setStepOracleExecute(dom);
+            }
+            else if (domType == "testStepOracleCheck") {
+                setStepOracleCheck(dom);
+            }
+            else if (domType == "testStepFile") {
+                setStepFile(dom);
+            }
+            else if (domType == "testStepWebInterface") {
+                setStepWebInterface(dom);
+            }
+            else {
+                cleanTable();
+            }
+
+        });
+    });
+
+
+</script>
+
+<script type="text/javascript">
+    function cleanTable() {
+        $("#testDetail").html("");
+    }
+
+{#    function addRow(domId, text1, text2, text3, text4) {#}
+{#        $("#testDetail").html("");#}
+{#        $("#testDetail").append("<input type='text' name='domParents' id='domParents' value='' hidden='hidden'>" +#}
+{#        "<input type='text' name='domId' id='domId' value='' hidden='hidden'>" +#}
+{#        "<table class='gridtable' id='conditionProperty' style='margin: 10px'> " +#}
+{#        "<tr><th style='width:140px;'>testCaseName</th> " +#}
+{#        "<th style='width:50px;'>type</th> " +#}
+{#        "<th style='width:200px;'>limit</th>" +#}
+{#        "<th style='width:100px;'>limit value</th>" +#}
+{#        "<th style='width:100px;'>operation</th></tr>" +#}
+{#        "</table>" +#}
+{#        "<p>type： RB 表示CBS话单批价</p>" +#}
+{#        "<p>limit： 表示测试用例限制类型，如sum(deduct_charge_amount)表示此话单入库结果需稽核条件</p> " +#}
+{#        "<p>limit value： 表示测试用例限制条件值，配合limit使用。如50表示此用例入库结果应为sum(deduct_charge_amount)=50</p>" +#}
+{#        "<p>以下输入测试用例对象。如RB类型输入话单内容，多条话单按第一条中的号码计算结果。</p>" +#}
+{#        "<textarea class='editor1' name='editor1' id='editor1' rows='10' cols='80' style='width: 90%'>" +#}
+{#        "</textarea>");#}
+{##}
+{#        $("#domId").val(domId);#}
+{#        var parents = findParentsNode(domId);#}
+{#        $("#domParents").val(parents);#}
+{#        var table = document.getElementById("conditionProperty");#}
+{#        var rowsNum = table.rows.length;#}
+{#        var row = table.insertRow(rowsNum);#}
+{#        var cell0 = row.insertCell(0);#}
+{#        cell0.innerHTML = "<input type='text' size='20' name='testCaseName' readonly ='readonly' value='" + text1 + "'>";#}
+{#        var cell1 = row.insertCell(1);#}
+{#        cell1.innerHTML = "<input type='text' size='5' name='testType' readonly ='readonly' value='" + text2 + "'>";#}
+{#        var cell2 = row.insertCell(2);#}
+{#        cell2.innerHTML = "<input type='text' size='30' id='testLimit' name='testLimit' value='" + text3 + "'>";#}
+{#        var cell3 = row.insertCell(3);#}
+{#        cell3.innerHTML = "<input type='text' size='8' id='testLimitValue' name='testLimitValue' value='" + text4 + "'>";#}
+{#        var cell4 = row.insertCell(4);#}
+{#        cell4.innerHTML = "<input type='button' onclick='sss()' value='submit'/>";#}
+{#    }#}
+
+{#    function addEditor(data) {#}
+{#        var editor = document.getElementById("editor1");#}
+{#        editor.value = data;#}
+{#        $(".editor1").removeAttr('readonly');#}
+{#    }#}
+    var to = false;
+$('#search_input').keyup(function () {
+    if(to) {
+        clearTimeout(to);
+    }
+    to = setTimeout(function () {
+        $('#jstree').jstree(true).search($('#search_input').val());
+
+    }, 250);
+});
+
+
+    function deleteItem(item_id, item_type) {
+        var res = false;
+        $.ajax({
+            //几个参数需要注意一下
+            type: "GET",//方法类型
+            async: false,
+            dataType: "json",//预期服务器返回的数据类型
+            url: "/main/delete?item_id=" + item_id + "&item_type=" + item_type,
+            success: function (result) {
+//                console.log(result);//打印服务端返回的数据(调试用)
+                if (result.resultCode == '302'){
+                            top.location.href = result.result;
+                        }
+                else if (result.resultCode == 200) {
+                    res = true;
+                    return res;
+                }
+                else {
+                    console.log(result);
+                }
+
+
+            },
+            error: function () {
+                alert("异常！");
+            }
+        });
+        return res;
+    }
+function changeScreen() {
+                if ($("#full-screen-btn").text() == "全屏显示") {
+                       parent.quan();
+                    $("#full-screen-btn").text("退出全屏");
+                } else {
+                    parent.exitQ();
+                    $("#full-screen-btn").text("全屏显示");
+                }
+            }
+
+</script>
+
+
+</body>
+</html>
