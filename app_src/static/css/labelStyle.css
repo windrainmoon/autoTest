@@ -1,0 +1,48 @@
+label{
+    /*background: #F1F1F1;*/
+	padding-top: 4px;
+	margin-right: 4px;
+	width: 20%;
+	word-wrap: break-word;
+	text-align: right;
+}
+.bc_field_req, .bc_field_label {
+	margin: 1px 0 3px 0;
+	padding-bottom: 0px;
+	border: 0;
+	float: left;
+    width: 35%;
+	background-color: #f1f1f1;
+	text-align: left;
+}
+.bc_field_select {
+	width: 30%;
+	float: left;
+}
+.bc_field_input {
+	width: 100%;
+	float: left;
+}
+.bc_field_textarea {
+    margin-top: 3%;
+	width: 100%;
+	height: 50%;
+}
+th, p, div, a, form, pre, h2 {
+	margin: 0;
+	padding: 3px;
+	font-size: 11px;
+	font-family: "Tahoma","Arial","宋体";
+	color: #333;
+	line-height: 130%;
+    background: #F1F1F1;
+}
+
+.search_input {
+	width: 60%;
+	float: left;
+}
+
+.showResult {
+	text-align: center;
+}

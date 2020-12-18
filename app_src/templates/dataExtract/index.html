@@ -1,0 +1,78 @@
+<html>
+<head>
+    <title>Flask-SocketIO Test</title>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/jquery.min.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/socket/socket.io.min.js') }}"></script>
+    <script type="text/javascript" charset="utf-8">
+    $(document).ready(function() {
+        var socket = io.connect();
+
+        socket.on('connect', function() {
+            socket.emit('connect_event', {data: 'connected!'});
+        });
+
+        socket.on('server_response', function(msg) {
+            $('#log').append('<br>');
+            $('#log').append('Received #' + ': ' + msg.data);
+        });
+
+        $('form#emit').submit(function(event) {
+                socket.emit('client_event', {data: $('#emit_data').html()});
+                return false;
+            });
+    });
+
+    </script>
+</head>
+<body>
+    <h2>WebSokect</h2>
+    <form id="emit" method="POST" action='#'>
+        <div contenteditable="true" type="text" name="emit_data" id="emit_data" placeholder="Message" style="border-style: solid;"></div>
+        <input type="submit" value="Echo">
+    </form>
+    <div id='log'></div>
+</body>
+<script type="text/javascript">
+(function(){
+    var imgReader = function( item ){
+        var blob = item.getAsFile(),
+            reader = new FileReader();
+        // 读取文件后将其显示在网页中
+        reader.onload = function( e ){
+            var img = new Image();
+
+            img.src = e.target.result;
+            {#document.body.appendChild( img );#}
+        };
+        // 读取文件
+        reader.readAsDataURL( blob );
+    };
+    document.getElementById( 'emit_data' ).addEventListener( 'paste', function( e ){
+         // 添加到事件对象中的访问系统剪贴板的接口
+        var clipboardData = e.clipboardData,
+            i = 0,
+            items, item, types;
+
+        if( clipboardData ){
+            items = clipboardData.items;
+            if( !items ){
+                return;
+            }
+            item = items[0];
+            // 保存在剪贴板中的数据类型
+            types = clipboardData.types || [];
+            for( ; i < types.length; i++ ){
+                if( types[i] === 'Files' ){
+                    item = items[i];
+                    break;
+                }
+            }
+            // 判断是否为图片数据
+            if( item && item.kind === 'file' && item.type.match(/^image\//i) ){
+                imgReader( item );
+            }
+        }
+    });
+})();
+</script>
+</html>

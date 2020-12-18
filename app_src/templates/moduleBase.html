@@ -1,0 +1,50 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}
+    {% endblock %}</title>
+<script src="{{ url_for('static', filename='js/main/func_common.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/jquery.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='packages/jstree/jstree.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/common/treeView.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/common/alert.js') }}"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='packages/jstree/themes/default/style.min.css') }}"/>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/docs.css') }}"/>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.css') }}"/>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/labelStyle.css') }}"/>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/tableStyle.css') }}"/>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/helpStyle.css') }}"/>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/selectStyle.css') }}"/>
+    {% block links %}
+    {% endblock %}
+</head>
+<body>
+
+<div id="box" style="float: left;width: 98%;height: 98%; position:relative; margin: 5px">
+<div id="treeDetail" style="float: left;width: 30%;height: 100%;overflow: auto;">
+    <p style="width: 50%;float: left;">{% block treeTitle %}
+
+    {% endblock %}</p>
+<button id="full-screen-btn" onclick="return changeScreen()" style="width: 100px">全屏显示</button>
+<input type="text" id="search_input" class="search_input" placeholder="请输入信息搜索" />
+    <button id="suite_id" hidden="hidden"></button>
+
+    <div id="jstree" style="float: left;width: 100%"></div>
+</div>
+    <div id="line"
+         style="float:left;top:0;left:30%;height:100%;width:4px;overflow:hidden;background:#fcf6ff;cursor:w-resize;"></div>
+    <div id="testCaseDetail" style="float: right;width: 65%;height: 100%;overflow: auto" class="table-wrapper">
+{% block testCaseDetail %}
+{% endblock %}
+    </div>
+</div>
+</body>
+
+<script type="text/javascript">
+    moveMiddleline();
+    searchTree();
+</script>
+    {% block javascript %}
+
+    {% endblock %}
+

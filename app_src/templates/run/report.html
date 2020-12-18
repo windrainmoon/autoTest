@@ -1,0 +1,76 @@
+
+<html>
+<style scoped="scoped">
+                body {
+                    text-align: center;
+                }
+                div {float: left;margin-bottom: 2%}
+                table {
+                    border-collapse: collapse;
+                    border-spacing: 0;
+                    empty-cells: show;
+                    border: 1px solid #cbcbcb;
+                    {#font-size: 3px;#}
+                    margin: 1% auto;
+                    table-layout: fixed;
+                    {#word-break: break-all;#}
+                    word-wrap: break-word;
+                }
+                table td, th {
+                    border-left: 1px solid #cbcbcb;
+                    border-width: 0 0 0 1px;
+                    margin: 0;
+                    padding: 0.3em 0.5em;
+                    width:100px
+                }
+                table td:first-child, table th:first-child {
+                    border-left-width: 0;
+                }
+                table thead, table tfoot {
+                    color: #000;
+                    text-align: left;
+                    vertical-align: bottom;
+                }
+                table thead {
+                    background: #e0e0e0;
+                }
+                table tfoot {
+                    background: #ededed;
+                }
+                table tr:nth-child(2n-1) td {
+                    background-color: #f2f2f2;
+                }
+                </style>
+<body>
+
+<h1>{{ title }}</h1>
+{% for data in datas %}
+    {% if data['type'] == 'svg' %}
+<div style="width: 50%; ">
+   <embed type="image/svg+xml" src= {{ data['data']|safe }} />
+</div>
+    {% endif %}
+
+
+    {% if data['type'] == 'table' %}
+<div style="width: 100%;float: none;margin: 1% auto">
+   {{ data['data']|safe }}
+</div>
+    {% endif %}
+
+
+    {% if data['type'] == 'text' %}
+<div style="text-align: center; float:none">
+  <div style="width: 100%;">{{ data['data']|safe }}</div>
+</div>
+    {% endif %}
+{% endfor %}
+
+
+</body>
+
+
+
+
+
+</html>

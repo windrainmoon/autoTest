@@ -1,0 +1,257 @@
+<html>
+<style>
+    canvas {
+        display: block;
+        margin: 50px auto;
+        box-shadow: -2px -2px 2px #EFEFEF, 5px 5px 5px #B9B9B9;
+    }
+    h2 {
+        text-align: center;
+    }
+</style>
+
+<head>
+    <meta charset="utf-8"/>
+    <title>服务内部错误</title>
+</head>
+<body>
+<textarea id="error_reason" >很遗憾，报错了.....{{ reason }} </textarea>
+<h2>赢了才能离开！</h2>
+<canvas id="chess" width="450px" height="450px"></canvas>
+</body>
+</html>
+
+<script>
+    var me = true;
+    var over = false;
+    var chessBox = [];
+    var wins = [];  //定义三维数组
+    //赢法统计数组
+    var myWin = [];
+    var computerWin = [];
+    for (i = 0; i < 15; i++) {
+        chessBox[i] = [];
+        for (j = 0; j < 15; j++) {
+            chessBox[i][j] = 0;
+        }
+    }
+    for (var i = 0; i < 15; i++) {
+        wins[i] = [];
+        for (var j = 0; j < 15; j++) {
+            wins[i][j] = [];
+        }
+    }
+    var count = 0;
+    //所有横线
+    for (var i = 0; i < 15; i++) {
+        for (var j = 0; j < 11; j++) {
+            //执行1次
+            // wins[0][0][0]=true;
+            // wins[0][1][0]=true;
+            // wins[0][2][0]=true;
+            // wins[0][3][0]=true;
+            // wins[0][4][0]=true;
+            //执行2次
+            // wins[0][1][1]=true;
+            // wins[0][2][1]=true;
+            // wins[0][3][1]=true;
+            // wins[0][4][1]=true;
+            // wins[0][5][1]=true;
+            for (var k = 0; k < 5; k++) {
+                wins[i][j + k][count] = true;
+            }
+            count++;
+        }
+    }
+    //所有竖线
+    for (var i = 0; i < 15; i++) {
+        for (var j = 0; j < 11; j++) {
+            for (var k = 0; k < 5; k++) {
+                wins[j + k][i][count] = true;
+            }
+            count++;
+        }
+    }
+    //所有斜线
+    for (var i = 0; i < 11; i++) {
+        for (var j = 0; j < 11; j++) {
+            for (var k = 0; k < 5; k++) {
+                wins[i + k][j + k][count] = true;
+            }
+            count++;
+        }
+    }
+    //所有反斜线
+    for (var i = 0; i < 11; i++) {
+        for (var j = 14; j > 3; j--) {
+            for (var k = 0; k < 5; k++) {
+                wins[i + k][j - k][count] = true;
+            }
+            count++;
+        }
+    }
+
+    console.log(count);
+    for (var i = 0; i < count; i++) {
+        myWin[i] = 0;
+        computerWin[i] = 0;
+    }
+
+    var chess = document.getElementById('chess');
+    var context = chess.getContext('2d');
+    context.strokeStyle = "#BFBFBF";
+    var logo = new Image();
+    logo.src = "{{ url_for('static', filename='png/底盘.jpg') }}";
+    logo.onload = function () {
+        context.drawImage(logo, 0, 0, 450, 450);
+        drawChessBoard();
+// oneStep(0,0,true);
+// oneStep(1,1,false);
+    };
+
+    function drawChessBoard() {
+        for (var i = 0; i < 15; i++) {
+            context.moveTo(15 + i * 30, 15);
+            context.lineTo(15 + i * 30, 435);
+            context.moveTo(15, 15 + i * 30);
+            context.lineTo(435, 15 + i * 30);
+            context.stroke();
+        }
+
+    }
+
+    var oneStep = function (i, j, me) {
+        context.beginPath();
+        context.arc(15 + i * 30, 15 + j * 30, 13, 0, 2 * Math.PI);
+        context.closePath();
+        var gradient = context.createRadialGradient(15 + i * 30, 15 + j * 30, 13, 15 + i * 30, 15 + j * 30, 0);
+        if (me) {
+            gradient.addColorStop(0, "#0A0A0A");
+            gradient.addColorStop(1, "#636766");
+        } else {
+            gradient.addColorStop(0, "#D1D1D1");
+            gradient.addColorStop(1, "#F9F9F9");
+        }
+
+        context.fillStyle = gradient;
+        context.fill();
+    }
+
+    chess.onclick = function (e) {
+        if (over) {
+            return;
+        }
+        if (!me) {
+            return;
+        }
+        var x = e.offsetX;
+        var y = e.offsetY;
+        var i = Math.floor(x / 30); //i,j为索引序列号
+        var j = Math.floor(y / 30);
+        if (chessBox[i][j] == 0) {
+            oneStep(i, j, me);
+
+            chessBox[i][j] = 1;
+
+
+            for (var k = 0; k < count; k++) {
+                if (wins[i][j][k]) {
+                    myWin[k]++;
+                    computerWin[k] = 6; //设置异常值
+                    if (myWin[k] == 5) {
+                        window.alert("你赢了");
+                        over = true;
+                    }
+                }
+            }
+            if (!over) {
+                me = !me;
+                computerAI();
+            }
+        }
+
+    }
+    var computerAI = function () {
+        var myScore = [];
+        var computerScore = [];
+        var max = 0; //保存最高分数；
+        var u = 0, v = 0; //保存坐标
+        for (var i = 0; i < 15; i++) {
+            myScore[i] = [];
+            computerScore [i] = [];
+            for (var j = 0; j < 15; j++) {
+                myScore[i][j] = 0;
+                computerScore[i][j] = 0;
+            }
+        }
+        for (var i = 0; i < 15; i++) {
+            for (var j = 0; j < 15; j++) {
+                if (chessBox[i][j] == 0) {
+                    for (var k = 0; k < count; k++) {
+                        if (wins[i][j][k]) {
+                            if (myWin[k] == 1) {
+                                myScore[i][j] += 200;
+                            } else if (myWin[k] == 2) {
+                                myScore[i][j] += 400;
+                            } else if (myWin[k] == 3) {
+                                myScore[i][j] += 2000;
+                            } else if (myWin[k] == 4) {
+                                myScore[i][j] += 10000;
+                            }
+                            if (computerWin[k] == 1) {
+                                computerScore[i][j] += 220;
+                            } else if (computerWin[k] == 2) {
+                                computerScore[i][j] += 420;
+                            } else if (computerWin[k] == 3) {
+                                computerScore[i][j] += 2020;
+                            } else if (computerWin[k] == 4) {
+                                computerScore[i][j] += 10020;
+                            }
+                        }
+                    }
+                    if (myScore[i][j] > max) {
+                        max = myScore[i][j];
+                        u = i;
+                        v = j;
+                    } else if (myScore[i][j] == max) {
+                        if (computerScore[i][j] > computerScore[u][v]) {
+                            u = i;
+                            v = j;
+                        }
+                    }
+                    if (computerScore[i][j] > max) {
+                        max = computerScore[i][j];
+                        u = i;
+                        v = j;
+                    } else if (computerScore[i][j] == max) {
+                        if (myScore[i][j] > myScore[u][v]) {
+                            u = i;
+                            v = j;
+                        }
+                    }
+                }
+            }
+        }
+        oneStep(u, v, false);
+        chessBox[u][v] = 2;
+        for (var k = 0; k < count; k++) {
+            if (wins[u][v][k]) {
+                computerWin[k]++;
+                myWin[k] = 6; //设置异常值
+                if (computerWin[k] == 5) {
+                    window.alert("你输了，O(∩_∩)O");
+                    over = true;
+                    var ReturnHomePage = window.confirm("点击‘确定’或5秒后自动返回~");
+                    if (ReturnHomePage) {
+                        window.location.href = '/';
+                    } else {
+                        setTimeout("javascript:location.href='/'", 5000);
+                    }
+                }
+            }
+        }
+        if (!over) {
+            me = !me;
+        }
+    }
+</script>

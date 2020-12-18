@@ -1,0 +1,141 @@
+{% extends "moduleBase.html" %}
+{% block title %}
+    run schedule
+{% endblock %}
+
+{% block links %}
+        <script src="{{ url_for('static', filename='js/run/schedule.js') }}"></script>
+{% endblock %}
+{% block treeTitle %}
+    配置计划任务
+    {% endblock %}
+
+{% block testCaseDetail %}
+        <h2>定时计划配置</h2>
+        <input type="button" onclick="saveSchedule()" value="save">
+        <div>
+            <form id="scheduleForm">
+                <table id="scheduleTable" class="fl-table">
+                    <tr>
+                        <th style="width: 15%;">是否启用</th>
+                        <th style="width: 10%;">分</th>
+                        <th style="width: 10%;">时</th>
+                        <th style="width: 10%;">日</th>
+                        <th style="width: 10%;">月</th>
+                        <th style="width: 10%;">周</th>
+                        <th style="width: 25%;">是否发送结果</th>
+                    </tr>
+                    <tr>
+                        {% if isRun=='yes' %}
+                            <td><select name="isRun">
+                                <option value="yes" selected>yes</option>
+                                <option value="no">no</option>
+                            </select></td>
+                        {% else %}
+                            <td><select name="isRun">
+                                <option value="yes">yes</option>
+                                <option value="no" selected>no</option>
+                            </select></td>
+                        {% endif %}
+                        <td><input name="min" style="width: 100%;" type="text" value="{{ min }}" maxlength="4"></td>
+                        <td><input name="hour" style="width: 100%;" type="text" value="{{ hour }}" maxlength="4"></td>
+                        <td><input name="day" style="width: 100%;" type="text" value="{{ day }}" maxlength="4"></td>
+                        <td><input name="month" style="width: 100%;" type="text" value="{{ month }}" maxlength="4"></td>
+                        <td><input name="week" style="width: 100%;" type="text" value="{{ week }}" maxlength="4"></td>
+                        {% if isSend =='yes' %}
+                            <td><select name="isSend">
+                                <option value="yes" selected>yes</option>
+                                <option value="no">no</option>
+                            </select></td>
+                        {% else %}
+                            <td><select name="isSend">
+                                <option value="yes">yes</option>
+                                <option value="sendWhenError" selected>send when error</option>
+                                <option value="no" selected>no</option>
+                            </select></td>
+                        {% endif %}
+                    </tr>
+                </table>
+            </form>
+            <table id='taskTable' class='taskTable fl-table' style="float: right;width: 100%">
+                <tr>
+                    <th style="width: 45%">testCaseName</th>
+                    <th style="width:15%">test time</th>
+                    <th style="width:30%">test progress</th>
+                    <th style="width: 10%">查看结果</th>
+                </tr>
+                {% for runData in runDatas %}
+                    <tr>
+                        <td>{{ runData[1] }}</td>
+                        <td id="{{ runData[0] + 't' }}">{{ runData[2] }}</td>
+                        <td>
+                            <progress id="{{ runData[0] + 'p' }}" max="100" value="{{ runData[3] }}"></progress>
+                            <label id="{{ runData[0] + 'l' }}">{{ runData[3] }}%</label>
+                        </td>
+                        {% if runData[3] == 100 %}
+                            <td id="{{ runData[0] + 'd' }}" class="showResult">
+                                <input type="button" value='showResult' onclick="showTestResult('{{ runData[0] }}')">
+                            </td>
+                        {% else %}
+                            <td id="{{ runData[0] + 'd' }}" class="showResult">
+                            </td>
+                        {% endif %}
+                    </tr>
+                {% endfor %}
+            </table>
+        </div>
+{% endblock %}
+
+{% block javascript %}
+    <script type="text/javascript">
+    $(function () {
+        //当DOM准备好时创建一个jstree实例
+        $('#jstree').jstree({
+            core: {
+                "check_callback": false,
+                data: function (node, render) {
+                    if (node.id == "#") {
+                        render(GetTreeData("", ""))
+                    } else if (node.original.type == "root" || node.original.type == "testHome") {
+                        render(GetTreeData(node.id, node.original.type))
+                    } else {
+                        render([])
+                    }
+                }
+            },
+            // plugins  存储所有已加载的jstree插件
+            'plugins': [
+                'types', 'search'
+            ],
+            "types": {
+                "root": {"valid_children": ["testHome"],
+                    "icon": "{{ url_for('static', filename='icons/testRoot.png')}}"}},
+                "testHome": {"valid_children": ["testSuite"],
+                    "icon": "{{ url_for('static', filename='icons/testHome.png')}}"},
+                "testSuite": {
+                    "valid_children": [],
+                    "icon": "{{ url_for('static', filename='icons/testSuite.png')}}"
+                },
+                '#': {"valid_children": []}
+            }
+            //contextmenu 存储contextmenu插件的所有默认值
+        });
+
+    });
+
+    $('#jstree').on('changed.jstree', function (e, data) {
+//当前选中节点的id
+        var dom = data.instance.get_node(data.selected[0]);
+        $("#suite_id").html(dom.id);
+        changeSchedule(dom.id);
+    });
+    $("#jstree").on("loaded.jstree", function (e, data) {
+        $('#jstree').jstree('open_all');
+    });
+
+
+    function showTestResult(runCaseId) {
+        window.open('showResult?runCaseId=' + runCaseId, 'testResult' + runCaseId, 'height=400, width=700, top=400, left=500, toolbar=no, menubar=no, scrollbars=no, resizable=no, location=no, status=no')
+    }
+    </script>
+{% endblock %}
