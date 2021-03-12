@@ -48,6 +48,14 @@
                                 </a>
                             </li>
                         {% endif %}
+                        {% if 'testFunction' in user_role %}
+                            <li>
+                                <a href="{{ url_for('runConfig.functionConfig') }}" target="showData">
+                                    <i class="zmdi zmdi-format-list-bulleted"></i> <span>runFunction</span>
+                                    <small class="badge float-right badge-light">New</small>
+                                </a>
+                            </li>
+                        {% endif %}
                         <li>
                             <a href="{{ url_for('login._login') }}">
                                 <i class="zmdi zmdi-grid"></i> <span>Others</span>

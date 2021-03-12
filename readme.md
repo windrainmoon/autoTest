@@ -101,30 +101,30 @@ jstree:https://www.jstree.com.cn/
 
 ---
 
-![title](https://github.com/windrainmoon/autoTest/tree/master/app_src/static/docs_pic/eye_40_60.jpg)
+![title](https://github.com/windrainmoon/autoTest/blob/master/app_src/static/docs_pic/eye_40_60.jpg)
 
 - version=2.0
 
 ##1.登录
 输入用户密码后，点击登录进入系统。默认10分钟未操作即需要重新登录。
 
-![login](https://github.com/windrainmoon/autoTest/tree/master/app_src/static/docs_pic/s_login.png)
+![login](https://github.com/windrainmoon/autoTest/blob/master/app_src/static/docs_pic/s_login.png)
  
 ## 2.TestCaseManagement测试用例管理
 进入管理界面后如下图所示。在根目录autoTestCase下，可以新增testHome，在testHome下可以新增testSuite。在testSuite下，可以新增testCase。在testCase下，可以新增testStep。testStep包括database命令（sql）操作、远程文件生成、远程shell命令执行、database断言、自定义报告输出、webservice接口及GUI测试操作。
 
-![testCase](https://github.com/windrainmoon/autoTest/tree/master/app_src/static/docs_pic/s_testCase_1.png)
+![testCase](https://github.com/windrainmoon/autoTest/blob/master/app_src/static/docs_pic/s_testCase_1.png)
 
 注意testStep顺序，执行时将按照顺序进行执行。每一步报错后，下一步即会直接跳过不再执行。
 每个组件都可以进行拖动以改变执行顺序。按住ctrl键拖动时，可以复制整个组件到新的位置。请记得修改相关文字说明。
 修改组件相关信息时，请在各节点按钮上右键，选择synchronize进行同步。不同节点会同步包括此节点及以下的所有配置（不包括参数相关，参数需在当前页面同步）
  
- ![synchronize](https://github.com/windrainmoon/autoTest/tree/master/app_src/static/docs_pic/s_synchronize.png)
+ ![synchronize](https://github.com/windrainmoon/autoTest/blob/master/app_src/static/docs_pic/s_synchronize.png)
 
 ## 2.1 用户参数
 单击根目录autoTestCase按钮，展示框会展示用户参数配置界面。autoTestCase根节点为公共参数节点，配置的参数全局可用。各testSuite上配置的参数本testSuite上可用。如果和公共节点有名称冲突，则以testSuite上配置的参数为准。
 
-![param](https://github.com/windrainmoon/autoTest/tree/master/app_src/static/docs_pic/s_param.png)
+![param](https://github.com/windrainmoon/autoTest/blob/master/app_src/static/docs_pic/s_param.png)
 
 参数类型分为5种：
 
@@ -139,19 +139,19 @@ jstree:https://www.jstree.com.cn/
 ## 2.2 数据库操作模块
 数据库操作模块需要选择执行sql的数据库。结果可以不选择进行保存。
 
-![s_oracleExecute](https://github.com/windrainmoon/autoTest/tree/master/app_src/static/docs_pic/s_oracleExecute.png)
+![s_oracleExecute](https://github.com/windrainmoon/autoTest/blob/master/app_src/static/docs_pic/s_oracleExecute.png)
  
 参数可以使用$(参数名)进行引用。注意不要在参数名前后增加空格。多个sql可以以分号分隔。如果选择保存执行结果，每次的执行结果都会循环覆盖保存到参数中。
 
 ## 2.3 数据库断言模块
 数据库断言模块需要选择执行sql的数据库。验证结果如果为多字段时，以逗号分隔。如执行SQL为：select id,name,age from student;那么期待结果可以为：001,王,15
 
-![s_oracleAssert](https://github.com/windrainmoon/autoTest/tree/master/app_src/static/docs_pic/s_oracleAssert.png)
+![s_oracleAssert](https://github.com/windrainmoon/autoTest/blob/master/app_src/static/docs_pic/s_oracleAssert.png)
 
 ## 2.4 文件操作模块
 选择需要生成文件的主机，及相应的文件名和路径。
 
-![s_file](https://github.com/windrainmoon/autoTest/tree/master/app_src/static/docs_pic/s_file.png)
+![s_file](https://github.com/windrainmoon/autoTest/blob/master/app_src/static/docs_pic/s_file.png)
 
 
 ## 2.5 webservice接口模块
@@ -165,14 +165,14 @@ jstree:https://www.jstree.com.cn/
 或者直接输入`haskey(cbs:ResultCode,0)`判断是否有此内容在返回报文中。
 多条判断条件以换行分隔。
  
- ![s_interface](https://github.com/windrainmoon/autoTest/tree/master/app_src/static/docs_pic/s_interface.png)
+ ![s_interface](https://github.com/windrainmoon/autoTest/blob/master/app_src/static/docs_pic/s_interface.png)
 
 ## 2.6 shell命令模块
 使用前需要先配置cmd参数。如下形式：
 `mv $(某目录文件A) $(某目录文件B)$(output)`
 则界面展示如下图所示。建议参数名称可以体现用途，如此命令名称为：移动“某目录文件A”到“某目录文件B”。
   
-  ![s_cmd](https://github.com/windrainmoon/autoTest/tree/master/app_src/static/docs_pic/s_cmd.png)
+  ![s_cmd](https://github.com/windrainmoon/autoTest/blob/master/app_src/static/docs_pic/s_cmd.png)
 
 如果命令中存在$(output)标记，则此命令需要进行返回值断言，界面上可以输入断言值（在“期望的输出”框中输入断言值）命令转义后不会展示$(output)标记。如果不需要断言，则执行命令成功即为成功。在最大循环次数后，如果断言为假，则返回错误。
 
@@ -236,7 +236,7 @@ jstree:https://www.jstree.com.cn/
 数据之间用逗号隔开，每行数据用换行符隔开。默认第一列为横轴节点，其他列为相应值。注意其他列应为数字。如果是sql_result参数，直接写参数替换即可，如$(我是参数)。
 结果如下所示：
 
-![report1](https://github.com/windrainmoon/autoTest/tree/master/app_src/static/docs_pic/s_report1.png)
+![report1](https://github.com/windrainmoon/autoTest/blob/master/app_src/static/docs_pic/s_report1.png)
 
 `pie`表示饼图。饼图中不需要head参数。仅需要N行两列的数据为展示数据，其中，第一列数据作为每个分项的名称，第二列数据应为数字，作为每个分项的值。因此应表示为
 
@@ -246,7 +246,7 @@ jstree:https://www.jstree.com.cn/
 丙,3)
 ```
 
-![report2](https://github.com/windrainmoon/autoTest/tree/master/app_src/static/docs_pic/s_report2.png)
+![report2](https://github.com/windrainmoon/autoTest/blob/master/app_src/static/docs_pic/s_report2.png)
 
 `table`表示自定义表格（原有markdown格式表格仍然可以支持）。表格不限制数据类型，可以展示任意字符串。head表示表头，如果不填则以数字默认填写。datas表示详细数据，按行填写。
 
@@ -256,7 +256,7 @@ jstree:https://www.jstree.com.cn/
 丙,3,4)
 ```
 
-![report3](https://github.com/windrainmoon/autoTest/tree/master/app_src/static/docs_pic/s_report3.png)
+![report3](https://github.com/windrainmoon/autoTest/blob/master/app_src/static/docs_pic/s_report3.png)
 
 ## 2.8 test Gui模块
 test Gui模块采用基于openCV定位，java.awt.Robot模拟操作，以截图匹配代替传统基于dom分析或其他定位方法用以测试（或执行）几乎所有类型的桌面操作。
@@ -267,7 +267,7 @@ test Gui模块采用基于openCV定位，java.awt.Robot模拟操作，以截图�
 
 界面如下所示：
 
-![gui1](https://github.com/windrainmoon/autoTest/tree/master/app_src/static/docs_pic/s_gui_1.png)
+![gui1](https://github.com/windrainmoon/autoTest/blob/master/app_src/static/docs_pic/s_gui_1.png)
 
 步骤类型共分为5种操作：
 
@@ -302,13 +302,13 @@ test Gui模块采用基于openCV定位，java.awt.Robot模拟操作，以截图�
 
 连贯的步骤可以分为多个testStep进行。如先打开APP，进行一部分操作后，在中间加入后台的验证，再进行下一个GUI的操作。同一个testSuite中的GUI是统一连贯的。示例如下：
 
-![gui2](https://github.com/windrainmoon/autoTest/tree/master/app_src/static/docs_pic/s_gui_2.png)
+![gui2](https://github.com/windrainmoon/autoTest/blob/master/app_src/static/docs_pic/s_gui_2.png)
 
 是否可忽略标志表示此操作如果执行失败，是否可以忽略并开始下一步操作。如某些弹窗或操作是有几率出现的，可以在此处配置为“yes”，即可在此步骤未执行或失败时跳过，直接处理下一个步骤。
 
 一个连贯的操作如下所示：
 
-![gui3](https://github.com/windrainmoon/autoTest/tree/master/app_src/static/docs_pic/g_gui_1.gif)
+![gui3](https://github.com/windrainmoon/autoTest/blob/master/app_src/static/docs_pic/g_gui_1.gif)
 
 ## 3. 配置循环测试用例
 在testCase节点上，可以配置循环执行参数，控制本testCase的执行循环次数，默认为1次，为避免循环次数太多造成执行时间过长，因此最多可设置为99次。设置0次则会跳过本testCase的执行。
@@ -320,9 +320,9 @@ test Gui模块采用基于openCV定位，java.awt.Robot模拟操作，以截图�
 ## 4. 执行用例
 在runTestCase界面，打开配置树，只能显示到testSuite一层。在testSuite上右键，选择runTestSuite，即可开始执行此测试套件。执行完成后，可点击“showResult”按钮查看执行结果。
   
-![s_startCase1](https://github.com/windrainmoon/autoTest/tree/master/app_src/static/docs_pic/s_startCase1.png)
+![s_startCase1](https://github.com/windrainmoon/autoTest/blob/master/app_src/static/docs_pic/s_startCase1.png)
 #
 
-![s_startCase2](https://github.com/windrainmoon/autoTest/tree/master/app_src/static/docs_pic/s_startCase2.png)
+![s_startCase2](https://github.com/windrainmoon/autoTest/blob/master/app_src/static/docs_pic/s_startCase2.png)
 
  

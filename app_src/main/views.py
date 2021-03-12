@@ -57,7 +57,7 @@ def queryUserParam():
 @check_login
 def queryGUIParam():
     param_tree_id = request.args.get("param_tree_id", None)
-    print('queryGUIParam:', param_tree_id)
+    # print('queryGUIParam:', param_tree_id)
     if param_tree_id:
         lines = makeGUItable(param_tree_id)
         result = jsonify({'resultCode': 200, 'result': lines})
@@ -106,7 +106,7 @@ def dropTestItem():
             dropTestCaseById(item_id)
         elif item_type == "testSuite":
             dropTestSuiteById(item_id)
-        elif item_type[:8] == "testStep":
+        elif item_type[:8] == "testStep" or item_type == 'function':
             dropTestStepById(item_id)
         elif item_type[:8] == "testHome":
             dropTestHomeById(item_id)
@@ -137,8 +137,11 @@ def synchronizeParam():
     user_id = getUserId()
     param_tree_id = request.args.get("param_tree_id")
     data = request.get_data()
-    res = saveUserParam(user_id, param_tree_id, data)
-    if not data or res:
+    if param_tree_id == "function":
+        res = saveUserFuncParam(user_id, data)
+    else:
+        res = saveUserParam(user_id, param_tree_id, data)
+    if res:  # data为空表示清除所有参数;res不为0表示有错误
         return jsonify({'resultCode': 0, 'result': res or 'failed'})
     else:
         return jsonify({'resultCode': 200, 'result': ""})
@@ -157,7 +160,7 @@ def synchronizeTestSuite():
 @check_login
 def viewCopyNode():
     data = json.loads(request.get_data())
-    print('copy node,', data)
+    # print('copy node,', data)
     user_id = getUserId()
     copyNode(data, user_id)
     return jsonify({'resultCode': 200, 'result': ""})

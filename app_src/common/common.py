@@ -25,7 +25,7 @@ try:
     assert db is not None
 except Exception as e:
     db_error = str(e)
-    print(db_error)
+    print("get database error: ", db_error)
     sys.exit(-1)
 
 from app_src.main.roleFunc import getUserRole
@@ -154,7 +154,6 @@ def getTestStepByCase(case_id):
 def getTestCaseBySuite(suite_id):
     sql = "select * from testCases where suite_id=:v1 order by position"
     result = db.execute(sql, [suite_id]).fetchall()
-    print(result)
     return result
 
 

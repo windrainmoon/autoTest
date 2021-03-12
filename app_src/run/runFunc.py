@@ -37,6 +37,12 @@ def lineBreak(line, length):
         return temp.replace("\n", '<br>')
 
 
+def cleanRunLog(runCaseId, csrf_token):
+    sql = "delete from runTestCaseLog where runCaseId=:v1 and csrf_token=:v2"
+    db.execute(sql, [runCaseId, csrf_token])
+    db.commit()
+
+
 def getRunLogByToken(csrf_token):
     sql = "select a.runCaseId, b.suite_description,a.endTime,(case when round(a.nowItemCount*1.0/a.allItemCount*100) > 100 then 100 when round(a.nowItemCount*1.0/a.allItemCount*100) < 0 then 0 else round(a.nowItemCount*1.0/a.allItemCount*100) end)" \
           "from runTestCaseLog a,testSuites b " \

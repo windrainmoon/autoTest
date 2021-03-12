@@ -85,6 +85,16 @@ def refreshProgress():
     return result
 
 
+@run.route("/cleanLog", methods=['GET', 'POST'])
+@check_login
+def cleanLog():
+    runCaseId = request.args.get('runCaseId')
+    csrf_token = session['csrf_token']
+    cleanRunLog(runCaseId, csrf_token)
+    result = jsonify({'resultCode': 200, 'result': ""})
+    return result
+
+
 @run.route("/showResult", methods=['GET', 'POST'])
 # @check_login
 def showResult():

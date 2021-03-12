@@ -24,7 +24,7 @@ label{
 	float: left;
 }
 .bc_field_textarea {
-    margin-top: 3%;
+    //margin-top: 3%;
 	width: 100%;
 	height: 50%;
 }
@@ -36,6 +36,18 @@ th, p, div, a, form, pre, h2 {
 	color: #333;
 	line-height: 130%;
     background: #F1F1F1;
+}
+
+.showXml {
+	overflow: auto;
+	margin-top: 3%;
+}
+
+.showXml .showP {
+	background-color: white;
+	line-height: 1;
+	padding: 1px;
+
 }
 
 .search_input {

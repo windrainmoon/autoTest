@@ -8,190 +8,224 @@
 
 {% block treeTitle %}
     执行test case
-    {% endblock %}
+{% endblock %}
 
 {% block testCaseDetail %}
     <h2>执行test case</h2>
-        <input type="button" onclick="refreshProgress()" value="refresh">
-        <table id='taskTable' class='taskTable fl-table' style="float: right;width: 100%">
+    <input type="button" onclick="refreshProgress()" value="refresh">
+    <table id='taskTable' class='taskTable fl-table' style="float: right;width: 100%">
+        <tr>
+            <th style="width: 40%">testCaseName</th>
+            <th style="width:15%">test time</th>
+            <th style="width:25%">test progress</th>
+            <th style="width: 10%">test result</th>
+            <th style="width: 10%">clean</th>
+        </tr>
+        {% for runData in runDatas %}
             <tr>
-                <th style="width: 45%">testCaseName</th>
-                <th style="width:15%">test time</th>
-                <th style="width:30%">test progress</th>
-                <th style="width: 10%">查看结果</th>
-            </tr>
-            {% for runData in runDatas %}
-                <tr>
-                    <td>{{ runData[1] }}</td>
-                    <td id="{{ runData[0] + 't' }}">{{ runData[2] }}</td>
-                    <td>
-                        <progress id="{{ runData[0] + 'p' }}" max="100" value="{{ runData[3] }}"></progress>
-                        <label id="{{ runData[0] + 'l' }}">{{ runData[3] }}%</label>
+                <td>{{ runData[1] }}</td>
+                <td id="{{ runData[0] + 't' }}">{{ runData[2] }}</td>
+                <td>
+                    <progress id="{{ runData[0] + 'p' }}" max="100" value="{{ runData[3] }}"></progress>
+                    <label id="{{ runData[0] + 'l' }}">{{ runData[3] }}%</label>
+                </td>
+                {% if runData[3] == 100 %}
+                    <td id="{{ runData[0] + 'd' }}" class="showResult">
+                        <input type="button" value='showResult' onclick="showTestResult('{{ runData[0] }}')"></td>
+                    <td><input type="button" value='clean' onclick="cleanLog('{{ runData[0] }}', this)"></td>
+                {% else %}
+                    <td id="{{ runData[0] + 'd' }}" class="showResult">
                     </td>
-                    {% if runData[3] == 100 %}
-                        <td id="{{ runData[0] + 'd' }}" class="showResult">
-                           <input type="button" value='showResult' onclick="showTestResult('{{ runData[0] }}')"></td>
-                    {% else %}
-                        <td id="{{ runData[0] + 'd' }}" class="showResult">
-                        </td>
-                    {% endif %}
-                </tr>
-            {% endfor %}
-        </table>
+                {% endif %}
+
+
+            </tr>
+        {% endfor %}
+    </table>
 {% endblock %}
 
 
 
 {% block javascript %}
     <script type="text/javascript">
-    $(function () {
-        //当DOM准备好时创建一个jstree实例
-        $('#jstree').jstree({
-            core: {
-                "check_callback": false,
-                data: function (node, render) {
-                    if (node.id == "#") {
-                        render(GetTreeData("", ""))
+        $(function () {
+            //当DOM准备好时创建一个jstree实例
+            $('#jstree').jstree({
+                core: {
+                    "check_callback": false,
+                    data: function (node, render) {
+                        if (node.id == "#") {
+                            render(GetTreeData("", ""))
+                        } else if (node.original.type == "root" || node.original.type == "testHome") {
+                            render(GetTreeData(node.id, node.original.type))
+                        } else {
+                            render([])
+                        }
                     }
-                    else if (node.original.type == "root" || node.original.type == "testHome") {
-                        render(GetTreeData(node.id, node.original.type))
-                    }
-                    else {
-                        render([])
-                    }
-                }
-            },
-            // plugins  存储所有已加载的jstree插件
-            'plugins': [
-                'contextmenu', 'types', 'search'
-            ],
-            "types": {
-                "root": {"valid_children": ["testHome"],
-                    "icon": "{{ url_for('static', filename='icons/testRoot.png')}}"},
-                "testHome": {"valid_children": ["testSuite"],
-                    "icon": "{{ url_for('static', filename='icons/testHome.png')}}"},
-                "testSuite": {
-                    "valid_children": [],
-                    "icon": "{{ url_for('static', filename='icons/testSuite.png')}}"
                 },
-                '#': {"valid_children": []}
-            },
-            //contextmenu 存储contextmenu插件的所有默认值
-            "contextmenu": {
-                'items': customMenuRun
-            }
+                // plugins  存储所有已加载的jstree插件
+                'plugins': [
+                    'contextmenu', 'types', 'search'
+                ],
+                "types": {
+                    "root": {
+                        "valid_children": ["testHome"],
+                        "icon": "{{ url_for('static', filename='icons/testRoot.png')}}"
+                    },
+                    "testHome": {
+                        "valid_children": ["testSuite"],
+                        "icon": "{{ url_for('static', filename='icons/testHome.png')}}"
+                    },
+                    "testSuite": {
+                        "valid_children": [],
+                        "icon": "{{ url_for('static', filename='icons/testSuite.png')}}"
+                    },
+                    '#': {"valid_children": []}
+                },
+                //contextmenu 存储contextmenu插件的所有默认值
+                "contextmenu": {
+                    'items': customMenuRun
+                }
+            });
+
         });
 
-    });
-
-    $('#jstree').on('changed.jstree', function (e, data) {
+        $('#jstree').on('changed.jstree', function (e, data) {
 //当前选中节点的id
-        var dom = data.instance.get_node(data.selected[0]);
-        $("#suite_id").html(dom.id);
-    });
-    $("#jstree").on("loaded.jstree", function (e, data) {
-                    $('#jstree').jstree('open_all');
-                    });
+            var dom = data.instance.get_node(data.selected[0]);
+            $("#suite_id").html(dom.id);
+        });
+        $("#jstree").on("loaded.jstree", function (e, data) {
+            $('#jstree').jstree('open_all');
+        });
 
-    function customMenuRun(node) {
-        var items = {
-            'runTestSuite': {
-                'label': 'run testSuite',
-                'action': function (obj) {
-                    var suite_id = $("#suite_id").html();
-                    $.ajax({
-                        type: "GET",
-                        url: "/run/runTestSuite?suite_id=" + suite_id,
-                        {#                                        data: JSON.stringify(),#}
-                        dataType: "json",
-                        async: false,
-                        success: function (result) {
-                            if (result.resultCode == '302'){
-                            top.location.href = result.result;
-                        }
-                            else{
-                                addNewTask(result.result);
-                            myAlert('您好：', "task start!", false);
+        function customMenuRun(node) {
+            var items = {
+                'runTestSuite': {
+                    'label': 'run testSuite',
+                    'action': function (obj) {
+                        var suite_id = $("#suite_id").html();
+                        $.ajax({
+                            type: "GET",
+                            url: "/run/runTestSuite?suite_id=" + suite_id,
+                            dataType: "json",
+                            async: false,
+                            success: function (result) {
+                                if (result.resultCode == '302') {
+                                    top.location.href = result.result;
+                                } else {
+                                    addNewTask(result.result);
+                                    myAlert('您好：', "task start!", false);
+                                }
+                            },
+                            error: function (result) {
+                                myAlert("您好：", "tart run error!", false);
                             }
-                        },
-                        error: function (result) {
-                            myAlert("您好：", "tart run error!", false);
-                        }
-                    });
-                }
-            }
-        };
-        if (node.type == 'root' || node.type == 'testHome') {
-            delete items.runTestSuite;
-        }
-        //注意要有返回值
-        return items;
-    }
-
-    function refreshProgress() {
-        $.ajax({
-            type: "GET",
-            url: "/run/refreshProgress",
-            {#            data: JSON.stringify("{1:1}"),#}
-            dataType: "json",
-            async: false,
-            success: function (result) {
-                if (result.resultCode == '302'){
-                            top.location.href = result.result;
-                        }
-                else if (result.resultCode == '200') {
-                    for (row in result.result) {
-                        {#console.log("refresh", row);#}
-                        var id_t = "#" + result.result[row][0] + "t";
-                        var id_p = result.result[row][0] + "p";
-                        var id_l = "#" + result.result[row][0] + "l";
-                        var id_d = "#" + result.result[row][0] + "d";
-                        var percent = result.result[row][3];
-                        if (percent > 100){
-                            percent = 100;
-                        }
-                        else if (percent < 0){
-                            percent = 0;
-                        }
-                        document.getElementById(id_p).value = percent;
-                        $(id_l).html(percent + '%');
-                        $(id_t).html(result.result[row][2]);
-                        if (percent >= 100){
-                            var temp = "showTestResult('" + result.result[row][0] + "')";
-                            var inner_data = '<input type="button" value="showResult" onclick=' + temp  + '>';
-                            $(id_d).html(inner_data);
-                        }
+                        });
                     }
                 }
-            },
-            error: function (result) {
-{#                alert("synchronize error!");#}
+            };
+            if (node.type == 'root' || node.type == 'testHome') {
+                delete items.runTestSuite;
             }
-        });
-    }
+            //注意要有返回值
+            return items;
+        }
+
+        function refreshProgress() {
+            $.ajax({
+                type: "GET",
+                url: "/run/refreshProgress",
+                {#            data: JSON.stringify("{1:1}"),#}
+                dataType: "json",
+                async: false,
+                success: function (result) {
+                    if (result.resultCode == '302') {
+                        top.location.href = result.result;
+                    } else if (result.resultCode == '200') {
+                        for (row in result.result) {
+                            var id_t = "#" + result.result[row][0] + "t";
+                            var id_p = result.result[row][0] + "p";
+                            var id_l = "#" + result.result[row][0] + "l";
+                            var id_d = "#" + result.result[row][0] + "d";
+                            var id_c = "#" + result.result[row][0] + "c";
+                            var percent = result.result[row][3];
+                            if (percent > 100) {
+                                percent = 100;
+                            } else if (percent < 0) {
+                                percent = 0;
+                            }
+                            document.getElementById(id_p).value = percent;
+                            $(id_l).html(percent + '%');
+                            $(id_t).html(result.result[row][2]);
+                            if (percent >= 100) {
+                                var temp = "showTestResult('" + result.result[row][0] + "')";
+                                var inner_data = '<input type="button" value="showResult" onclick=' + temp + '>';
+                                $(id_d).html(inner_data);
+                                var clean_temp = "cleanLog('" + result.result[row][0] + "',this)";
+                                var clean_data = '<input type="button" value="clean" onclick=' + clean_temp + '>';
+                                $(id_c).html(clean_data);
+                            }
+                        }
+                    }
+                },
+                error: function (result) {
+                    {#                alert("synchronize error!");#}
+                }
+            });
+        }
+
+        function cleanLog(runCaseId, obj) {
+            $.ajax({
+                type: "GET",
+                url: "/run/cleanLog?runCaseId=" + runCaseId,
+                dataType: "json",
+                async: false,
+                success: function (result) {
+                    if (result.resultCode == '302') {
+                        top.location.href = result.result;
+                    } else if (result.resultCode == '200') {
+                        refreshProgress();
+
+                        var tr = obj.parentNode.parentNode;
+                        //找到表格
+                        var tbody = tr.parentNode;
+                        //删除行
+                        tbody.removeChild(tr);
+                    }
+                },
+                error: function (result) {
+                    {#                alert("synchronize error!");#}
+                }
+            });
+        }
 
 
-    function addNewTask(task_lines) {
-        var task_id = task_lines[0];
-        var task_name = task_lines[1];
-        var table = document.getElementById("taskTable");
-        var rowsNum = table.length;
-        var row = table.insertRow(rowsNum);
-        var cell0 = row.insertCell(0);
-        cell0.innerHTML = task_name;
-        var cell1 = row.insertCell(1);
-        cell1.innerHTML = "";
-        cell1.setAttribute("id", task_id + 't');
-        var cell2 = row.insertCell(2);
-        cell2.innerHTML = "<progress id='" + task_id + "p' max='100' value='0.0'></progress> <label id='" + task_id + "l'>0%</label>";
-        var cell3 = row.insertCell(3);
-        cell3.innerHTML = "";
-        cell3.setAttribute("id", task_id + 'd');
-    }
+        function addNewTask(task_lines) {
+            var task_id = task_lines[0];
+            var task_name = task_lines[1];
+            var table = document.getElementById("taskTable");
+            var rowsNum = table.length;
+            var row = table.insertRow(rowsNum);
+            var cell0 = row.insertCell(0);
+            cell0.innerHTML = task_name;
+            var cell1 = row.insertCell(1);
+            cell1.innerHTML = "";
+            cell1.setAttribute("id", task_id + 't');
+            var cell2 = row.insertCell(2);
+            cell2.innerHTML = "<progress id='" + task_id + "p' max='100' value='0.0'></progress> <label id='" + task_id + "l'>0%</label>";
+            var cell3 = row.insertCell(3);
+            cell3.innerHTML = "";
+            cell3.setAttribute("id", task_id + 'd');
+            var cell4 = row.insertCell(4);
+            cell4.innerHTML = "";
+            cell4.setAttribute("id", task_id + 'c');
+        }
 
-    function showTestResult(runCaseId){
-        window.open('showResult?runCaseId=' + runCaseId, 'testResult' + runCaseId, 'height=400, width=800, top=400, left=500, toolbar=no, menubar=no, scrollbars=no, resizable=no, location=no, status=no')
-    }
-    setInterval(refreshProgress, 5000);
-</script>
+        function showTestResult(runCaseId) {
+            window.open('showResult?runCaseId=' + runCaseId, 'testResult' + runCaseId, 'height=400, width=800, top=400, left=500, toolbar=no, menubar=no, scrollbars=no, resizable=no, location=no, status=no')
+        }
+
+        setInterval(refreshProgress, 5000);
+    </script>
 {% endblock %}

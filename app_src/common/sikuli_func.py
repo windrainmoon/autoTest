@@ -46,7 +46,7 @@ try:
         if args[0].__class__ == str and ".png" in args[0]:
             args = list(args)
             args[0] = pic_path + args[0]
-            print(args[0])
+            # print(args[0])
         return r.wait(*args)
 
 
@@ -55,7 +55,7 @@ try:
         if args[0].__class__ == str and ".png" in args[0]:
             args = list(args)
             args[0] = pic_path + args[0]
-            print(args[0])
+            # print(args[0])
         return s.click(*args)
 
 
@@ -67,9 +67,9 @@ try:
         if args[0].__class__ == str and ".png" in args[0]:
             args = list(args)
             args[0] = pic_path + args[0]
-            print(args[0])
+            # print(args[0])
         return r.type(*args)
 except Exception as e:
-    print(e)
+    print("import GUI lib error!", e)
 
 

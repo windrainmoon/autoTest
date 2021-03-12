@@ -10,9 +10,9 @@ from flask_login import LoginManager
 
 # app = Flask(__name__)
 # # socketio = SocketIO(app)
-# app.config['DEBUG'] = True
+# app.runConfig['DEBUG'] = True
 # # babel = Babel(app)
-# app.config['SECRET_KEY'] = 'app.config'
+# app.runConfig['SECRET_KEY'] = 'app.runConfig'
 #
 #
 
@@ -21,7 +21,7 @@ app = Flask(__name__, template_folder='templates')
 # socketio = SocketIO(app)
 app.config['DEBUG'] = True
 # babel = Babel(app)
-app.config['SECRET_KEY'] = 'app.config'
+app.config['SECRET_KEY'] = 'app.runConfig'
 
 login_manager = LoginManager()
 login_manager.init_app(app)

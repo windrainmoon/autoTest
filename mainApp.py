@@ -5,6 +5,8 @@ from app_src import app\
 from app_src.main import main
 from app_src.login import login
 from app_src.run import run
+from app_src.runConfig import runConfig
+
 # from app.dataExtract import dataExtract
 from app_src.run.runFunc import lineBreak
 from conf import port
@@ -16,6 +18,7 @@ warnings.filterwarnings("ignore")
 app.register_blueprint(main, url_prefix='/main')
 app.register_blueprint(login, url_prefix='/login')
 app.register_blueprint(run, url_prefix='/run')
+app.register_blueprint(runConfig, url_prefix='/runConfig')
 # app.register_blueprint(dataExtract, url_prefix='/dataExtract')
 
 env = app.jinja_env
@@ -29,7 +32,7 @@ def hello_world():
 
 @app.errorhandler(404)
 def not_found(error):
-    print(error)
+    print("raise 404 error:", error)
     resp = make_response(render_template('about/404.html'), 404)
     resp.headers['X-Something'] = 'A value'
     return resp
@@ -45,7 +48,7 @@ def error_Exception(error):
 
 @app.errorhandler(Exception)
 def error_Exception(error):
-    print(error)
+    print("500 error:", error)
     resp = make_response(render_template('about/500.html'), 500)
     resp.headers['X-Something'] = 'A value'
     return resp

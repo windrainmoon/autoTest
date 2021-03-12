@@ -1203,7 +1203,7 @@ function randomString(len) {
                     error: "check",
                     plugin: "core",
                     id: "core_03",
-                    reason: "User config for core.check_callback prevents function: " + b,
+                    reason: "User runConfig for core.check_callback prevents function: " + b,
                     data: JSON.stringify({chk: b, pos: e, obj: c && c.id ? c.id : !1, par: d && d.id ? d.id : !1})
                 }, !1) : !0
             }, last_error: function () {

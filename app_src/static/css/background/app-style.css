@@ -3320,7 +3320,7 @@ table.grid td {
   padding: 12px 30px;
   position: absolute;
   right: 0;
-  left: 250px;
+  left: 20%;
   background-color: transparent;
   border-top: 1px solid rgba(255, 255, 255, 0.12);
   -webkit-transition: all 0.3s ease;

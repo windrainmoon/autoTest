@@ -31,7 +31,7 @@ try:
     SESSION_EXPIRE_TIME = int(
         config['DEFAULT']['SESSION_EXPIRE_TIME']) or 10  # session store time(minutes), re-login after expire
 except Exception as e:
-    print('config file error: %s' % e)
+    print('runConfig file error: %s' % e)
     port = 2345  # main app listening port
     SESSION_EXPIRE_TIME = 10  # session store time(minutes), re-login after expire
 

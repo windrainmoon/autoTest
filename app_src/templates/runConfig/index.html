@@ -1,23 +1,24 @@
 {% extends "moduleBase.html" %}
 {% block title %}
-    testCase
+    run config
 {% endblock %}
 
 {% block links %}
     {#    <script language="javascript" src="{{ url_for('static', filename='js/jquery.table.tr.js') }}"></script>#}
     <script src="{{ url_for('static', filename='js/main/func_common.js') }}"></script>
     <script src="{{ url_for('static', filename='js/main/func_param.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/main/func_tree.js') }}"></script>
+{#    <script src="{{ url_for('static', filename='js/main/func_tree.js') }}"></script>#}
+    <script src="{{ url_for('static', filename='js/main/func_runConfig.js') }}"></script>
     <script src="{{ url_for('static', filename='js/main/func_sikuli.js') }}"></script>
 {% endblock %}
 
 {% block treeTitle %}
-    以下为测试流程配置
+    以下为自定义方法配置
 {% endblock %}
 
 {% block testCaseDetail %}
-    <form id="testDetail">
-        <h2>testCase配置</h2>
+    <form id="configDetail">
+        <h2>function配置</h2>
     </form>
 {% endblock %}
 
@@ -36,11 +37,7 @@
                 core: {
                     "check_callback": true,
                     data: function (node, render) {
-                        if (node.id == "#") {
-                            render(GetTreeData("", ""))
-                        } else {
-                            render(GetTreeData(node.id, node.original.type));
-                        }
+                        render(GetUserFuncion())
                     }
                 },
                 // plugins  存储所有已加载的jstree插件
@@ -48,20 +45,13 @@
                     'contextmenu', 'types', 'dnd', 'search'
                 ],
                 "types": {
-                    '#': {"valid_children": []},
-                    "root": {"valid_children": ["testHome"],
+                    "root": {"valid_children": ["function"],
                         "icon": "{{ url_for('static', filename='icons/testRoot.png')}}"},
-                    "testHome": {"valid_children": ["testSuite"],
-                        "icon": "{{ url_for('static', filename='icons/testHome.png')}}"},
-                    "testCase": {
+                    "function": {
                         "valid_children": ["testStepDbExecute", "testStepFile", "testStepDbCheck",
                             "testStepWebInterface", "testStepCmd", "testStepReport",
-                        "testStepGui", "function"],
-                        "icon": "{{ url_for('static', filename='icons/testCase.png')}}"
-                    },
-                    "testSuite": {
-                        "valid_children": ["testCase"],
-                        "icon": "{{ url_for('static', filename='icons/testSuite.png')}}"
+                        "testStepGui"],
+                        "icon": "{{ url_for('static', filename='icons/testFunction.png')}}"
                     },
                     "testStepDbExecute": {
                         "valid_children": [],
@@ -90,48 +80,36 @@
                     "testStepGui": {
                         "valid_children": [],
                         "icon": "{{ url_for('static', filename='icons/testStep_GUI.png')}}"
-                    },
-                    "function": {
-                        "valid_children": [],
-                        "icon": "{{ url_for('static', filename='icons/testFunction.png')}}"
                     }
                 },
                 //contextmenu 存储contextmenu插件的所有默认值
                 'contextmenu': {
-                    'items': customMenu
+                    'items': runConfigMenu
                     }
             });
-
-            //loaded.jstree: triggered after the root node is loaded for the first time
-            //ready.jstree : triggered after all nodes are finished loading
-
-            {#$("#jstree").on("loaded.jstree", function (e, data) {#}
-            {#    $('#jstree').jstree('open_all');#}
-            //});
 
             $("#jstree").on("ready.jstree", function (e, data) {
                 {#$('#jstree').jstree('close_all');#}
                 $('#jstree').jstree('open_node', '#root');
-                setFunctions();
             });
 
             $("#jstree").on("open_node.jstree", function (e, data) {
                 var bb = $('#jstree').jstree('is_open', data.node);
                 if (bb == true){
                     var nodeType = data.node.type;
-                    if (nodeType == "testSuite"){
+                    if (nodeType == "root"){
                         $('#jstree').jstree('open_all', data.node);
                     }
                 }
             });
 
 
-            $('#jstree').on('move_node.jstree', function (e, data) {
-                moveNode(data);
-            });
-            $('#jstree').on('copy_node.jstree', function (e, data) {
-                copyNode(data);
-            });
+            {#$('#jstree').on('move_node.jstree', function (e, data) {#}
+            {#    moveNode(data);#}
+            {# } );#}
+            {#$('#jstree').on('copy_node.jstree', function (e, data) {#}
+            {#    copyNode(data);#}
+            {# });#}
 
             $('#jstree').on('changed.jstree', function (e, data) {
 //当前选中节点的id
@@ -141,9 +119,7 @@
                 var dom = data.instance.get_node(data.selected[0]);
                 var domType = dom.type;
                 if (domType.slice(0, 4) == "root" || domType == "testSuite") {
-                    setParamTable(dom);
-                } else if (domType == "testCase") {
-                    setTestCaseRecycle(dom);
+                    {#setParamTable(dom);#}
                 } else if (domType == "testStepDbExecute") {
                     setStepDbExecute(dom);
                 } else if (domType == "testStepDbCheck") {
@@ -158,8 +134,6 @@
                     setStepReport(dom);
                 } else if (domType == "testStepGui") {
                     setGUITable(dom);
-                }else if (domType == "function") {
-                    setFuncTable(dom);
                 }else {
                     cleanTable();
                 }

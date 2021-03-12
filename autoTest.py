@@ -30,7 +30,7 @@ if __name__ == "__main__":
             usage()
     checkFlag, checkResult = checkUser(user_id, password)
     if not checkFlag:
-        print(checkResult)
+        # print(checkResult)
         sys.exit(-1)
     user_suites = TestSuites(user_id=user_id, suite_name=suite_name)
     suite_exists = user_suites.checkUserSuites()

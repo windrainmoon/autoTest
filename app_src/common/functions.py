@@ -395,7 +395,7 @@ class TestCases:
         return res
 
     @staticmethod
-    def __getStepClass(step_data, runCaseId, allTestParam):
+    def getStepClass(step_data, runCaseId, allTestParam):
         if step_data[1] == 'testStepDbExecute':
             return TestStepDbExecute(step_data[0], runCaseId, allTestParam)
         elif step_data[1] == 'testStepFile':
@@ -410,6 +410,10 @@ class TestCases:
             return TestStepReport(step_data[0], runCaseId, allTestParam)
         elif step_data[1] == 'testStepGui':
             return TestStepGui(step_data[0], runCaseId, allTestParam)
+        elif step_data[1] == 'function':
+            return TestStepFunction(step_data[0], runCaseId, allTestParam)
+        else:
+            return
 
     def run(self, is_run=1):
         self.case_name = self.__getCaseName()
@@ -418,27 +422,17 @@ class TestCases:
         for step in allTestStep:
             # print(step_flag)
             if step_flag == 1:
-                step_result = TestResult(self.__getStepClass(step, self.runCaseId, self.allTestParam))
+                step_result = TestResult(self.getStepClass(step, self.runCaseId, self.allTestParam))
                 if step_result.result_code != 0:
                     step_flag = 0
                 else:
                     step_flag = 1
             else:
-                step_result = TestResult(self.__getStepClass(step, self.runCaseId, self.allTestParam), is_run=0)
+                step_result = TestResult(self.getStepClass(step, self.runCaseId, self.allTestParam), is_run=0)
             self.allTestResult.append(step_result)
 
 
 class TestStep:
-    # 要考虑threading
-    _instance_lock = threading.Lock()
-
-    def __new__(cls, *args, **kwargs):
-        if not hasattr(TestStep, "_instance"):
-            with TestStep._instance_lock:
-                if not hasattr(TestStep, "_instance"):
-                    TestStep._instance = super().__new__(cls)
-        return TestStep._instance
-
     def __init__(self, step_id, runCaseId, allTestParam):
         self.step_id = step_id
         self.runCaseId = runCaseId
@@ -448,6 +442,7 @@ class TestStep:
         self.allTestParam = allTestParam
         self.name = self.__getStepName()
         self.localPath = 'tempFile/'
+        self.details = None
         # TestStepGui需要的全局变量
         if not hasattr(self, 'GUI'):
             self.GUI = {}
@@ -464,7 +459,8 @@ class TestStep:
         return self.name
 
     def getStepDetail(self):
-        self.details = getStepById(self.step_id)
+        if not self.details:
+            self.details = getStepById(self.step_id)
 
     def setError(self, desc, code=2, type=None):
         self.result_code = code
@@ -536,6 +532,39 @@ class TestStep:
         pass
 
 
+class TestStepSingle(TestStep):
+    # 要考虑threading, 单例
+    _instance_lock = threading.Lock()
+
+    def __new__(cls, *args, **kwargs):
+        if not hasattr(TestStepSingle, "_instance"):
+            with TestStepSingle._instance_lock:
+                if not hasattr(TestStepSingle, "_instance"):
+                    TestStepSingle._instance = super().__new__(cls)
+        return TestStepSingle._instance
+
+
+class TestStepFunction(TestStep):
+    def getFuncDetail(self):
+        sql = "select function_id, detail_name, position, ability_id, ability_param_1, ability_param_2, ability_param_3, " \
+              "ability_param_4, ability_param_5 from testFunctionDetail where function_id = :v1 order by position"
+        res = db.execute(sql, [self.step_id[:16]]).fetchall()
+        return res
+
+    def run(self, is_run):
+        if not is_run:
+            self.setError("before step got Error!", 1)
+            return
+        funcDetail = self.getFuncDetail()
+        for i in funcDetail:
+            subFunc = TestCases.getStepClass([i[0], i[3]], self.runCaseId, self.allTestParam)
+            subFunc.details = [i[0], i[3], i[4], i[5], i[6], i[7], i[8], 0, i[1], i[2]]
+            subFunc.run(is_run)
+            if subFunc.result_code != 0:
+                self.setError(subFunc.result_desc, subFunc.result_code)
+                return
+
+
 class TestStepDbExecute(TestStep):
     def run(self, is_run):
         self.getStepDetail()
@@ -548,7 +577,7 @@ class TestStepDbExecute(TestStep):
         self.param3 = self.details[4].replace("；", ";")
 
         print("start db execute!")
-
+        # print(self.db_type, self.param1)
         connect_flag, connect = self.getDbConnect(self.db_type, self.param1)
         if connect_flag == -1:
             self.setError(str(connect))
@@ -698,6 +727,8 @@ class TestStepFile(TestStep):
             self.param3 = self.param3 + '/'
 
         if self.param1 in ('127.0.0.1', 'localhost'):
+            if not os.path.exists(self.param3):
+                os.makedirs(self.param3)
             with open(self.param3 + self.param2, 'w', encoding='utf-8') as f:
                 f.write(self.param4)
 
@@ -763,18 +794,19 @@ class TestStepWebInterface(TestStep):
 
     @staticmethod
     def CallWebInterface(texturl, postcontent):
+        postcontent = postcontent.replace('<?xml version="1.0" encoding="UTF-8"?>', '')
         postcontent = postcontent.replace(
             '${=(new java.text.SimpleDateFormat("yyyyMMddHHmmss")).format(new Date())}${=(int)(Math.random()*1000)}',
             TestStepWebInterface.getRandomSeq())
         req = urllib.request.Request(texturl, data=postcontent.encode('utf-8'),
                                      headers={'Content-Type': 'text/xml;charset=UTF-8'})
+        print('---------------------', texturl, '---------------------')
         print('---------------------', postcontent, '---------------------')
         msg = urllib.request.urlopen(req)
         lines = msg.read()
         lines = lines.decode('utf-8')
         print(lines)
-        callResult = xmltodict.parse(lines.replace("<?xml version='1.0' encoding='UTF-8'?>", ''))
-        return callResult
+        return lines
 
     def json2list(self, li, dic):
         if type(dic) == dict or type(dic) == OrderedDict:
@@ -804,6 +836,7 @@ class TestStepWebInterface(TestStep):
             partner = '\[.*?\]'
             prefix = ""
             suffix = ""
+            split_flag = ''
             split_flags = ['=', '<', '>', '>=', '<=', '!=']
             for split_flag in split_flags:
                 temp = predict.split(split_flag)
@@ -811,6 +844,8 @@ class TestStepWebInterface(TestStep):
                     prefix = temp[0].strip()
                     suffix = temp[1].strip()
                     break
+            if not split_flag:
+                return False
             if prefix:
                 # print(prefix, split_flag, suffix)
                 res = re.findall(partner, prefix)
@@ -853,15 +888,20 @@ class TestStepWebInterface(TestStep):
             return
         try:
             result = self.CallWebInterface(self.param1, self.param2)
+            self.allTestParam.append(param('sys_post_url', "string", self.param1))
+            self.allTestParam.append(param('sys_post_body', "string", self.param2))
+            self.allTestParam.append(param('sys_post_result', "string", result))
+            callResult = xmltodict.parse(result.replace("<?xml version='1.0' encoding='UTF-8'?>", ''))
+            self.allTestParam.append(param('sys_post_result_dict', "string", callResult))
             if len(self.param3) > 0:
                 for i in self.param3.split('\n'):
                     if i.strip() != '':
                         try:
-                            assert self._checkAssert(result, i.strip())
+                            assert self._checkAssert(callResult, i.strip())
                         except Exception as e:
-                            print('e', e)
+                            print('assert error: ', e)
                             self.setError("assert Error!<br>assert:%s<br>return code:[%s]" % (
-                                i.strip(), str(json.dumps(result))))
+                                i.strip(), str(json.dumps(callResult))))
                             return
         except Exception as e:
             self.setError("call web interface error:[%s]" % e)
@@ -1118,7 +1158,7 @@ class TestStepReport(TestStep):
         db.commit()
 
 
-class TestStepGui(TestStep):
+class TestStepGui(TestStepSingle):
     def __init__(self, step_id, runCaseId, allTestParam):
         super().__init__(step_id, runCaseId, allTestParam)
         self.functions = {'environment': self.__funcEnvironment, 'openApp': self.__funcOpenApp,
@@ -1148,7 +1188,7 @@ class TestStepGui(TestStep):
 
     def __dropTempPic(self):
         for file in self.tempFileList:
-            print("os.remove(" + pic_path + file + ")")
+            # print("os.remove(" + pic_path + file + ")")
             os.remove(pic_path + file)
         self.tempFileList = []
 
@@ -1305,3 +1345,5 @@ class TestStepGui(TestStep):
 
         print('execute over!')
         self.__dropTempPic()
+
+

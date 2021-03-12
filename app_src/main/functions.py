@@ -41,7 +41,7 @@ def copyChildren(childrenMaps, idMaps):
 
 
 def copyNode(data, user_id):
-    print(data)
+    # print(data)
     old_children = data['oriChildren']
     ori_parent = data['oriParent']
     new_children = data['newChildren']
@@ -82,7 +82,7 @@ def copyNode(data, user_id):
         sql_1 = "update testCases set POSITION = POSITION + 1 where POSITION >= :v1 and suite_id=:v2"
         sql_2 = "insert into testCases select :case_id, :suite_id, case_description, :position, repeat " \
                 "from testCases where case_id=:old_case_id"
-    elif data['type'][:8] == 'testStep':
+    elif data['type'][:8] == 'testStep' or data['type'] == 'function':
         sql_1 = "update testSteps set POSITION = POSITION + 1 where POSITION >= :v1 and case_id=:v2"
         sql_2 = "insert into testSteps select :step_id, step_type, step_param1, step_param2, step_param3," \
                 "step_param4, step_param5, :case_id, step_name, :POSITION " \
@@ -131,7 +131,7 @@ def moveNode(data, user_id):
         sql_2 = "update testCases set position = POSITION -1 where POSITION >:v1 and suite_id =:v2"
         sql_3 = "update testCases set position = POSITION +1 where POSITION >=:v1 and suite_id =:v2"
         sql_4 = "update testCases set position = :v1,suite_id=:v2 where case_id=:v3"
-    elif data['type'][:8] == 'testStep':
+    elif data['type'][:8] == 'testStep' or data['type'] == 'function':
         sql_0 = "select case_id from testSteps where step_id = :v1"
         sql_1 = "update testSteps set position=-2 where step_id = :v1"
         sql_2 = "update testSteps set position = POSITION -1 where POSITION >:v1 and case_id =:v2"
@@ -172,7 +172,7 @@ def addNode(data, user_id):
         position = db.execute(sql_po, [parent, ]).fetchone()
         sql = "insert into testCases VALUES (:case_id, :suite_id, :case_description, :POSITION, :repeat)"
         db.execute(sql, [id, parent, 'new testCase', position[0], 1])
-    elif data['type'][:8] == 'testStep':
+    elif data['type'][:8] == 'testStep' or data['type'] == 'function':
         sql_po = "select count(1) from testSteps where case_id=:case_id"
         position = db.execute(sql_po, [parent, ]).fetchone()
         sql = "insert into testSteps VALUES (:step_id, :step_type, :step_param1, :step_param2, " \
@@ -357,7 +357,7 @@ def saveGUIParam(param_tree_id, params):
         db.executemany(sql_insert, results)
         db.commit()
     except Exception as e:
-        print(e)
+        print("save GUI params error: ", e)
         db.rollback()
         return str(e)
     else:
@@ -375,9 +375,28 @@ def saveUserParam(user_id, param_tree_id, params):
         sql_delete = "delete from user_params where user_id=:v1 and param_tree_id=:v2"
         db.execute(sql_delete, [user_id, param_tree_id])
         sql = "insert into user_params(user_id, param_type, param_name, param_value, param_tree_id) values ('%s', :param_type, :param_name, :param_value, '%s')" % (user_id, param_tree_id)
-        db.executemany(sql, results)
+        if results != [['']]:  # 将所有数据删除，即不用插入
+            db.executemany(sql, results)
         sql_delete_empty = "delete from user_params where user_id=:v1 and param_name =''  "
-        db.execute(sql_delete_empty, [user_id, ])
+        db.execute(sql_delete_empty, [user_id, ])  # 清理空数据
+    except Exception as e:
+        db.rollback()
+        return e
+    else:
+        db.commit()
+        return 0
+
+
+def saveUserFuncParam(user_id, params):
+    params = urllib.parse.unquote(params.decode())
+    params2list = params.split('&')
+    trans_results = [i.replace('param_name=', '').replace('param_value=', '') for i in params2list]
+    results = [trans_results[i:i + 2] for i in range(0, len(trans_results), 2)]
+    print(f"{results=}")
+    try:
+        sql_update = "update user_params set param_value=:v1 " \
+                     "where user_id='%s' and param_name=:v2 and param_type='string'" % user_id
+        db.executemany(sql_update, [[i[1], i[0]] for i in results])
     except Exception as e:
         db.rollback()
         return e
@@ -398,7 +417,7 @@ def saveUserTree(datas, user_id):
             datas.remove(data)   # 只能移除一次！
             break
     if type == 'root':
-        print('datas', datas)
+        # print('datas', datas)
         for data in datas:
             if data['type'] == 'testHome':
                 setTestHome(data['id'], data['text'], user_id)
@@ -406,7 +425,7 @@ def saveUserTree(datas, user_id):
                 setTestSuite(data['id'], data['text'], data['parent'], user_id)
             elif data['type'] == 'testCase':
                 setTestCase(data['id'], data['parent'], data['text'], data['step_param1'])
-            elif data['type'][:8] == 'testStep':
+            elif (data['type'][:8] == 'testStep' or data['type'] == "function"):
                 setTestStep(data['id'], data['type'], data['step_param1'], data['step_param2'], data['step_param3'],
                             data['step_param4'], data['step_param5'], data['parent'], data['text'])
     elif type == 'testHome':
@@ -422,7 +441,7 @@ def saveUserTree(datas, user_id):
                 case_list.append(data['id'])
                 setTestCase(data['id'], data['parent'], data['text'], data['step_param1'])
         for data in datas:
-            if data['type'][:8] == 'testStep' and data['parent'] in case_list:
+            if (data['type'][:8] == 'testStep' or data['type'] == "function") and data['parent'] in case_list:
                 setTestStep(data['id'], data['type'], data['step_param1'], data['step_param2'], data['step_param3'],
                             data['step_param4'], data['step_param5'], data['parent'], data['text'])
     elif type == 'testSuite':
@@ -434,7 +453,7 @@ def saveUserTree(datas, user_id):
                 case_list.append(data['id'])
                 setTestCase(data['id'], data['parent'], data['text'], data['step_param1'])
         for data in datas:
-            if data['type'][:8] == 'testStep' and data['parent'] in case_list:
+            if (data['type'][:8] == 'testStep' or data['type'] == "function") and data['parent'] in case_list:
                 setTestStep(data['id'], data['type'], data['step_param1'], data['step_param2'], data['step_param3'],
                             data['step_param4'], data['step_param5'], data['parent'], data['text'])
     elif type == 'testCase':
@@ -443,11 +462,11 @@ def saveUserTree(datas, user_id):
                 case_list.append(data['id'])
                 setTestCase(data['id'], data['parent'], data['text'], data['step_param1'])
         for data in datas:
-            if data['type'][:8] == 'testStep' and data['parent'] == id :
+            if (data['type'][:8] == 'testStep' or data['type'] == "function") and data['parent'] == id :
                 setTestStep(data['id'], data['type'], data['step_param1'], data['step_param2'], data['step_param3'],
                             data['step_param4'], data['step_param5'], data['parent'], data['text'])
-    elif type[:8] == 'testStep':
+    elif type[:8] == 'testStep' or type == "function":
         for data in datas:
-            if data['type'][:8] == 'testStep' and data['id'] == id :
+            if (data['type'][:8] == 'testStep' or data['type'] == "function") and data['id'] == id:
                 setTestStep(data['id'], data['type'], data['step_param1'], data['step_param2'], data['step_param3'],
                             data['step_param4'], data['step_param5'], data['parent'], data['text'])

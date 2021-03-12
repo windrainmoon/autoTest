@@ -43,7 +43,7 @@ def checkSchedule(params):
         if week != '*' and int(now_time.weekday()) + 1 != int(week):
             return []
     except Exception as e:
-        print(e)
+        print("check schedual error! ", e)
         return []
     return [*params]
 
@@ -55,7 +55,7 @@ def startSchedule():
         res = checkSchedule(task)
         if len(res) > 0:
             run_list.append(res)
-    print(run_list)
+    # print(run_list)
     for i in run_list:
         isSendOut = 0 if i[2] == 'no' else 2 if i[2] == 'sendWhenError' else 1
         setNewTask(i[0], i[0], getUserBySuite(i[0]), crID(12), isSendOut)
